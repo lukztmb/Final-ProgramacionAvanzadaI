@@ -1,5 +1,5 @@
 package domain.repository;
 
-public class OrderRepository {
+public interface OrderRepository {
 
 }
