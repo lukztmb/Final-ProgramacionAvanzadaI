@@ -5,12 +5,12 @@ import java.time.LocalDateTime;
 
 public class PendingTask {
     private Long id;
-    private PendingTaskStatus type;
+    private PendingTaskType type;
     private PendingTaskStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime processedAt;
 
-    private PendingTask(Long id, PendingTaskStatus type, PendingTaskStatus status, LocalDateTime createdAt, LocalDateTime processedAt) {
+    private PendingTask(Long id, PendingTaskType type, PendingTaskStatus status, LocalDateTime createdAt, LocalDateTime processedAt) {
         this.id = id;
         this.type = type;
         this.status = status;
@@ -18,7 +18,7 @@ public class PendingTask {
         this.processedAt = processedAt;
     }
 
-    public static PendingTask create(PendingTaskStatus type, LocalDateTime createdAt) {
+    public static PendingTask create(PendingTaskType type, LocalDateTime createdAt) {
         if (type == null) {
             throw new BusinessRuleViolationsException("El tipo de tarea es requerido");
         }
@@ -37,7 +37,7 @@ public class PendingTask {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-    public PendingTaskStatus getType() { return type; }
+    public PendingTaskType getType() { return type; }
     public PendingTaskStatus getStatus() { return status; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getProcessedAt() { return processedAt; }
