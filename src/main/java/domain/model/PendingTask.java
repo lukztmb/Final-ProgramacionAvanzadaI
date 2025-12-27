@@ -22,17 +22,20 @@ public class PendingTask {
         if (type == null) {
             throw new BusinessRuleViolationsException("El tipo de tarea es requerido");
         }
+        if (createdAt == null || createdAt.isAfter(LocalDateTime.now())) {
+            throw new BusinessRuleViolationsException("La fecha ingresada es invalida");
+        }
         return new PendingTask(null, type, PendingTaskStatus.PENDING, createdAt, null);
     }
 
-    public void markAsDone(LocalDateTime processedAt) {
+    public void markAsDone() {
         this.status = PendingTaskStatus.DONE;
-        this.processedAt = processedAt;
+        this.processedAt = LocalDateTime.now();
     }
 
-    public void markAsError(LocalDateTime processedAt) {
+    public void markAsError() {
         this.status = PendingTaskStatus.ERROR;
-        this.processedAt = processedAt;
+        this.processedAt = LocalDateTime.now();
     }
 
     public Long getId() { return id; }

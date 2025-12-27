@@ -35,14 +35,17 @@ public class Order {
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new BusinessRuleViolationsException("El monto debe ser mayor a 0");
         }
+        if (createdAt == null || createdAt.isAfter(LocalDateTime.now())) {
+            throw new  BusinessRuleViolationsException("La fecha ingresada es invalida");
+        }
 
         return new Order(null, user, OrderStatus.PENDING, amount, createdAt, createdAt);
     }
 
-    public void updateStatus(OrderStatus newStatus, LocalDateTime updatedAt) {
+    public void updateStatus(OrderStatus newStatus) {
         // Aquí se podrían agregar validaciones de transición de estado (ej: no pasar de CANCELLED a APPROVED)
         this.status = newStatus;
-        this.updatedAt = updatedAt;
+        this.updatedAt = LocalDateTime.now();
     }
 
     public Long getId() { return id; }

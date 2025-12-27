@@ -31,8 +31,14 @@ public class User {
         if (email == null || email.isBlank()) {
             throw new BusinessRuleViolationsException("El email es requerido");
         }
-        if (password == null || password.isBlank()) {
-            throw new BusinessRuleViolationsException("La contraseña es requerida");
+        if (password == null || password.isBlank() || password.length() < 4) {
+            throw new BusinessRuleViolationsException("La contraseña invalida");
+        }
+        if (activationCode == null || activationCode.isBlank()) {
+            throw new BusinessRuleViolationsException("El codigo de activacion es requerido");
+        }
+        if (createdAt == null || createdAt.isAfter(LocalDateTime.now())) {
+            throw new BusinessRuleViolationsException("La fecha ingresada es invalida");
         }
 
         // Se asume expiración en 24hs por defecto (ajustable según regla de negocio específica)
