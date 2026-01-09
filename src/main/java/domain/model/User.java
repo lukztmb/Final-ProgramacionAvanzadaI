@@ -13,13 +13,13 @@ public class User {
     private LocalDateTime createdAt;
 
     // Constructor privado
-    private User(Long id, String email, String password, UserStatus status, String activationCode, LocalDateTime activationExpiresAt, LocalDateTime createdAt) {
+    private User(Long id, String email, String password, UserStatus status, String activationCode, LocalDateTime createdAt) {
         this.id = id;
         this.email = email;
         this.password = password;
         this.status = status;
-        this.activationCode = activationCode;
-        this.activationExpiresAt = activationExpiresAt;
+        this.activationCode = activationCode;   //Usamos un db en memoria
+        this.activationExpiresAt = activationExpiresAt;  //el tiempo nos los da la clave de activacion
         this.createdAt = createdAt;
     }
 
@@ -37,14 +37,7 @@ public class User {
         if (activationCode == null || activationCode.isBlank()) {
             throw new BusinessRuleViolationsException("El codigo de activacion es requerido");
         }
-        if (createdAt == null || createdAt.isAfter(LocalDateTime.now())) {
-            throw new BusinessRuleViolationsException("La fecha ingresada es invalida");
-        }
-
-        // Se asume expiración en 24hs por defecto (ajustable según regla de negocio específica)
-        LocalDateTime expiresAt = createdAt.plusHours(24);
-
-        return new User(null, email, password, UserStatus.PENDING, activationCode, expiresAt, createdAt);
+        return new User(null, email, password, UserStatus.PENDING, activationCode, createdAt);
     }
 
     // Comportamiento de dominio
@@ -53,12 +46,15 @@ public class User {
             throw new BusinessRuleViolationsException("Solo usuarios pendientes pueden ser activados");
         }
         this.status = UserStatus.ACTIVE;
-        this.activationCode = null; // Limpiar código tras uso
     }
 
     public boolean isActive() {
+        if (activationExpiresAt.isBefore(LocalDateTime.now())) {
+            this.status = UserStatus.EXPIRED;
+        }
         return this.status == UserStatus.ACTIVE;
     }
+
 
     // Getters y Setters necesarios (ID se setea tras persistencia)
     public Long getId() { return id; }
@@ -68,5 +64,6 @@ public class User {
     public UserStatus getStatus() { return status; }
     public String getActivationCode() { return activationCode; }
     public LocalDateTime getActivationExpiresAt() { return activationExpiresAt; }
+    public void setActivationCode(String activationCode) { this.activationCode = activationCode; }
     public LocalDateTime getCreatedAt() { return createdAt; }
 }
