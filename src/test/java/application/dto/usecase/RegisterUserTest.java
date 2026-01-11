@@ -30,7 +30,7 @@ public class RegisterUserTest {
 
         userRepository = mock(UserRepository.class);
         tokenRepository = new InMemoryActivationTokenRepository();
-        registerUser = new RegisterUser(userRepository, tokenRepository);
+        registerUser = new RegisterUser(userRepository);
     }
 
     @Test

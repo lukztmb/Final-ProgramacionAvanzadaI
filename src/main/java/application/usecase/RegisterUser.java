@@ -16,11 +16,9 @@ import java.util.UUID;
 @Service
 public class RegisterUser {
     private final UserRepository userRepository;
-    private final ActivationTokenRepository tokenRepository;
 
-    public  RegisterUser(UserRepository userRepository, ActivationTokenRepository tokenRepository) {
+    public  RegisterUser(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.tokenRepository = tokenRepository;
     }
 
     @Transactional
@@ -30,25 +28,17 @@ public class RegisterUser {
             throw new BusinessRuleViolationsException("Email ya esta registrado");
         }
 
-        //Generacion de Token para posterior activacion
-
-        String token = UUID.randomUUID().toString();
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime expired = now.plusHours(24);
 
         User user = User.create(
                 request.email(),
                 request.password(),
-                token,
+                request.codeActive(),
                 now
         );
 
         //Guardamos el usuario creado
         User savedUser = userRepository.save(user);
-
-        //Guardamos el token
-        ActivationToken tokenSaved = new ActivationToken(request.email(), token, expired);
-        tokenRepository.save(tokenSaved);
 
         //Response del RegisterUser
         return new UserResponseDTO(
