@@ -9,6 +9,7 @@ import domain.repository.OrderRepository;
 import domain.repository.UserRepository;
 import infrastructure.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -24,7 +25,7 @@ public class CreateOrder {
         this.userRepository = userRepository;
         this.orderMapper = orderMapper;
     }
-
+    @Transactional
     public OrderResponseDTO execute(Long userId, OrderRequestDTO request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + userId));
