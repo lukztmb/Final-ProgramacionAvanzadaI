@@ -33,7 +33,6 @@ public class RegisterUser {
         User user = User.create(
                 request.email(),
                 request.password(),
-                request.codeActive(),
                 now
         );
 

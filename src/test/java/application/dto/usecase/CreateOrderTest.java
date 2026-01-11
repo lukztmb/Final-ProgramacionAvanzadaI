@@ -1,4 +1,4 @@
-package usecase;
+package application.dto.usecase;
 
 import application.dto.request.OrderRequestDTO;
 import application.dto.response.OrderResponseDTO;
@@ -47,11 +47,12 @@ class CreateOrderTest {
 
     @BeforeEach
     void setUp() {
-        activeUser = User.create("active@test.com", "pass123", "code1", LocalDateTime.now());
+        activeUser = User.create("active@test.com", "pass123", LocalDateTime.now());
         activeUser.setId(1L);
+        activeUser.setExpiresAt(LocalDateTime.now().plusDays(1));
         activeUser.activate();
 
-        pendingUser = User.create("pending@test.com", "pass123", "code2", LocalDateTime.now());
+        pendingUser = User.create("pending@test.com", "pass123", LocalDateTime.now());
         pendingUser.setId(2L);
     }
 

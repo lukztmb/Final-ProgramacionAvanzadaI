@@ -13,13 +13,11 @@ public class User {
     private LocalDateTime createdAt;
 
     // Constructor privado
-    private User(Long id, String email, String password, UserStatus status, String activationCode, LocalDateTime createdAt) {
+    private User(Long id, String email, String password, UserStatus status, LocalDateTime createdAt) {
         this.id = id;
         this.email = email;
         this.password = password;
         this.status = status;
-        this.activationCode = activationCode;   //Usamos un db en memoria
-        this.activationExpiresAt = activationExpiresAt;  //el tiempo nos los da la clave de activacion
         this.createdAt = createdAt;
     }
 
@@ -27,17 +25,14 @@ public class User {
      * Factory Method para crear un nuevo Usuario.
      * Regla: Los nuevos usuarios comienzan en estado PENDING.
      */
-    public static User create(String email, String password, String activationCode, LocalDateTime createdAt) {
+    public static User create(String email, String password, LocalDateTime createdAt) {
         if (email == null || email.isBlank()) {
             throw new BusinessRuleViolationsException("El email es requerido");
         }
         if (password == null || password.isBlank() || password.length() < 4) {
             throw new BusinessRuleViolationsException("La contraseña invalida");
         }
-        if (activationCode == null || activationCode.isBlank()) {
-            throw new BusinessRuleViolationsException("El codigo de activacion es requerido");
-        }
-        return new User(null, email, password, UserStatus.PENDING, activationCode, createdAt);
+        return new User(null, email, password, UserStatus.PENDING, createdAt);
     }
 
     // Comportamiento de dominio
@@ -49,8 +44,13 @@ public class User {
     }
 
     public boolean isActive() {
+        if (activationExpiresAt == null) {
+            this.status = UserStatus.PENDING;
+            return false;
+        }
         if (activationExpiresAt.isBefore(LocalDateTime.now())) {
             this.status = UserStatus.EXPIRED;
+            return false;
         }
         return this.status == UserStatus.ACTIVE;
     }
@@ -64,6 +64,7 @@ public class User {
     public UserStatus getStatus() { return status; }
     public String getActivationCode() { return activationCode; }
     public LocalDateTime getActivationExpiresAt() { return activationExpiresAt; }
-    public void setActivationCode(String activationCode) { this.activationCode = activationCode; }
+    public void serActivationCode(String activationCode) { this.activationCode = activationCode; }
+    public void setExpiresAt(LocalDateTime expiresAt) { this.activationExpiresAt = expiresAt; }
     public LocalDateTime getCreatedAt() { return createdAt; }
 }

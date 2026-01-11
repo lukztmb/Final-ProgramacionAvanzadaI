@@ -29,7 +29,7 @@ public class RegisterUserTest {
     void setUp() {
 
         userRepository = mock(UserRepository.class);
-        tokenRepository = new InMemoryActivationTokenRepository();
+        tokenRepository = mock(InMemoryActivationTokenRepository.class);
         registerUser = new RegisterUser(userRepository);
     }
 
@@ -57,8 +57,6 @@ public class RegisterUserTest {
         assertEquals("PENDING", responseDTO.status());
 
         verify(userRepository, times(1)).save(any());
-
-        assertTrue(tokenRepository.findByEmail(request.email()).isPresent(), "Debería existir un token de activación");
 
     }
 

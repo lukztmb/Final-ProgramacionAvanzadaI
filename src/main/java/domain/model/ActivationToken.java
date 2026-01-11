@@ -24,4 +24,8 @@ public class ActivationToken {
     public String getEmail() {
         return email;
     }
+
+    public LocalDateTime getExpiresAt() {
+        return expiresAt;
+    }
 }
