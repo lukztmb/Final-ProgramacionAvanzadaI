@@ -49,7 +49,7 @@ class ActivateUserTest {
             Creamos manuelmente a un usuario para simular que se registro
             Colocamos el estado en pendiente de su activacion
          */
-        User pendigUser = User.create(email, "pass1234", validCode, now);
+        User pendigUser = User.create(email, "pass1234", now);
 
         //Simulamos que fue encontrado
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(pendigUser));
@@ -82,7 +82,7 @@ class ActivateUserTest {
         LocalDateTime expiredAt = now.plusHours(24);
 
         // creamos el usuario valido
-        User pendigUser = User.create(email, "pass1234", validCode, now);
+        User pendigUser = User.create(email, "pass1234", now);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(pendigUser));
 
         // creamos el token

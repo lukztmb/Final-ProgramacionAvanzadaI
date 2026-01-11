@@ -7,6 +7,7 @@ import domain.model.Order;
 import domain.model.User;
 import domain.repository.OrderRepository;
 import domain.repository.UserRepository;
+import infrastructure.exception.BusinessRuleViolationsException;
 import infrastructure.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,10 @@ public class CreateOrder {
     public OrderResponseDTO execute(Long userId, OrderRequestDTO request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + userId));
+
+        if (!user.isActive()) {
+            throw new BusinessRuleViolationsException("El usuario debe estar ACTIVO para crear órdenes");
+        }
 
         Order newOrder = Order.create(
                 user,
