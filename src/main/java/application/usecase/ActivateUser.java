@@ -36,6 +36,8 @@ public class ActivateUser {
             throw new BusinessRuleViolationsException("Codigo de activacion invalido");
         }
 
+        // Guardamos la fecha de vencimiento del token en el usuario
+        user.setExpiresAt(token.getExpiresAt());
         // Activamos el usuario
         user.activate();
         //Guardamos los cambios
