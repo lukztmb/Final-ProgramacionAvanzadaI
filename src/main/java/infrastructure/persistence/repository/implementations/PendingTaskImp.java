@@ -27,11 +27,6 @@ public class PendingTaskImp implements PendingTaskRepository {
     }
 
     @Override
-    public Optional<PendingTask> findById(Long id) {
-        return repository.findById(id).map(mapper::toDomain);
-    }
-
-    @Override
     public Optional<PendingTask> findFirstPending() {
         return repository.findByPending().map(mapper::toDomain);
     }
