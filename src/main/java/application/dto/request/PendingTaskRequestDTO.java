@@ -1,5 +1,11 @@
 package application.dto.request;
 
-public record PendingTaskRequestDTO(
+import domain.model.OrderStatus;
 
+import java.time.LocalDateTime;
+
+public record PendingTaskRequestDTO(
+        LocalDateTime startDate,
+        LocalDateTime endDate,
+        OrderStatus status
 ) {}

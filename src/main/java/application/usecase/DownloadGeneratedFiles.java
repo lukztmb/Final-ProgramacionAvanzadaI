@@ -9,7 +9,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -52,7 +51,7 @@ public class DownloadGeneratedFiles {
         try {
             processTask(task);
         } catch (Exception e){
-            e.printStackTrace();
+            System.out.println("Error al procesar el archivo " + e);
             task.markAsError();
             pendingTaskRepository.save(task);
         }
