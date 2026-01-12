@@ -13,13 +13,11 @@ public class User {
     private LocalDateTime createdAt;
 
     // Constructor privado
-    private User(Long id, String email, String password, UserStatus status, String activationCode, LocalDateTime activationExpiresAt, LocalDateTime createdAt) {
+    private User(Long id, String email, String password, UserStatus status, LocalDateTime createdAt) {
         this.id = id;
         this.email = email;
         this.password = password;
         this.status = status;
-        this.activationCode = activationCode;
-        this.activationExpiresAt = activationExpiresAt;
         this.createdAt = createdAt;
     }
 
@@ -27,24 +25,14 @@ public class User {
      * Factory Method para crear un nuevo Usuario.
      * Regla: Los nuevos usuarios comienzan en estado PENDING.
      */
-    public static User create(String email, String password, String activationCode, LocalDateTime createdAt) {
+    public static User create(String email, String password, LocalDateTime createdAt) {
         if (email == null || email.isBlank()) {
             throw new BusinessRuleViolationsException("El email es requerido");
         }
         if (password == null || password.isBlank() || password.length() < 4) {
             throw new BusinessRuleViolationsException("La contraseña invalida");
         }
-        if (activationCode == null || activationCode.isBlank()) {
-            throw new BusinessRuleViolationsException("El codigo de activacion es requerido");
-        }
-        if (createdAt == null || createdAt.isAfter(LocalDateTime.now())) {
-            throw new BusinessRuleViolationsException("La fecha ingresada es invalida");
-        }
-
-        // Se asume expiración en 24hs por defecto (ajustable según regla de negocio específica)
-        LocalDateTime expiresAt = createdAt.plusHours(24);
-
-        return new User(null, email, password, UserStatus.PENDING, activationCode, expiresAt, createdAt);
+        return new User(null, email, password, UserStatus.PENDING, createdAt);
     }
 
     // Comportamiento de dominio
@@ -53,12 +41,20 @@ public class User {
             throw new BusinessRuleViolationsException("Solo usuarios pendientes pueden ser activados");
         }
         this.status = UserStatus.ACTIVE;
-        this.activationCode = null; // Limpiar código tras uso
     }
 
     public boolean isActive() {
+        if (activationExpiresAt == null) {
+            this.status = UserStatus.PENDING;
+            return false;
+        }
+        if (activationExpiresAt.isBefore(LocalDateTime.now())) {
+            this.status = UserStatus.EXPIRED;
+            return false;
+        }
         return this.status == UserStatus.ACTIVE;
     }
+
 
     // Getters y Setters necesarios (ID se setea tras persistencia)
     public Long getId() { return id; }
@@ -68,5 +64,7 @@ public class User {
     public UserStatus getStatus() { return status; }
     public String getActivationCode() { return activationCode; }
     public LocalDateTime getActivationExpiresAt() { return activationExpiresAt; }
+    public void serActivationCode(String activationCode) { this.activationCode = activationCode; }
+    public void setExpiresAt(LocalDateTime expiresAt) { this.activationExpiresAt = expiresAt; }
     public LocalDateTime getCreatedAt() { return createdAt; }
 }
