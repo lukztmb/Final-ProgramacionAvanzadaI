@@ -7,7 +7,9 @@ import infrastructure.persistence.mapper.PersistenceMapper; // Asumiendo que exi
 import infrastructure.persistence.repository.interfaces.IOrderRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 public class OrderRepositoryImp implements OrderRepository {
@@ -30,5 +32,10 @@ public class OrderRepositoryImp implements OrderRepository {
     @Override
     public Optional<Order> findById(Long id) {
         return jpaRepository.findById(id).map(mapper::toDomain);
+    }
+
+    @Override
+    public List<Order> findAll() {
+        return jpaRepository.findAll().stream().map(mapper::toDomain).collect(Collectors.toList());
     }
 }
