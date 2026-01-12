@@ -26,9 +26,10 @@ public class DownloadGeneratedFiles {
     public  DownloadGeneratedFiles(PendingTaskRepository pendingTaskRepository, OrderRepository orderRepository) {
         this.pendingTaskRepository = pendingTaskRepository;
         this.orderRepository = orderRepository;
+        initializeStorage();
     }
 
-    private void initualizeStorage(){
+    private void initializeStorage(){
         try {
             if (!Files.exists(fileStorageLocation)) {
                 Files.createDirectories(fileStorageLocation);
@@ -78,7 +79,7 @@ public class DownloadGeneratedFiles {
 
         // Guardamos en el disco de la db
         Path target = fileStorageLocation.resolve(task.getId() + ".csv");
-        Files.write(target, csv.toString().getBytes(StandardCharsets.UTF_8));
+        Files.writeString(target, csv.toString());
 
 
         // Actualizamos el estado
