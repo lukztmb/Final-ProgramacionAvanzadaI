@@ -6,6 +6,7 @@ import domain.model.PendingTask;
 import domain.repository.OrderRepository;
 import domain.repository.PendingTaskRepository;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
@@ -15,6 +16,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public class DownloadGeneratedFiles {
 
     private final PendingTaskRepository pendingTaskRepository;

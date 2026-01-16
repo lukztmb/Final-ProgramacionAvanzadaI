@@ -40,7 +40,7 @@ public class UserImp implements UserRepository {
 
     @Override
     public List<User> findByStatus(UserStatus status) {
-        return repository.findAllByType(status)
+        return repository.findAllByStatus(status)
                 .stream()
                 .map(mapper::toUserDomain)
                 .collect(Collectors.toList());

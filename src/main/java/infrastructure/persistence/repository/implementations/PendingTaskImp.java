@@ -1,6 +1,7 @@
 package infrastructure.persistence.repository.implementations;
 
 import domain.model.PendingTask;
+import domain.model.PendingTaskStatus;
 import domain.repository.PendingTaskRepository;
 import infrastructure.persistence.entities.PendingTaskEntity;
 import infrastructure.persistence.mapper.PendingTaskMapper;
@@ -28,6 +29,6 @@ public class PendingTaskImp implements PendingTaskRepository {
 
     @Override
     public Optional<PendingTask> findFirstPending() {
-        return repository.findByPending().map(mapper::toDomain);
+        return repository.findFirstByStatus(PendingTaskStatus.PENDING).map(mapper::toDomain);
     }
 }
