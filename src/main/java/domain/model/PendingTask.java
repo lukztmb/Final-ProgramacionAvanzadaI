@@ -10,8 +10,8 @@ public class PendingTask {
     private LocalDateTime createdAt;
     private LocalDateTime processedAt;
 
-    private PendingTask(Long id, PendingTaskType type, PendingTaskStatus status, LocalDateTime createdAt, LocalDateTime processedAt) {
-        this.id = id;
+    private PendingTask(PendingTaskType type, PendingTaskStatus status, LocalDateTime createdAt, LocalDateTime processedAt) {
+        this.id = null;
         this.type = type;
         this.status = status;
         this.createdAt = createdAt;
@@ -25,7 +25,7 @@ public class PendingTask {
         if (createdAt == null || createdAt.isAfter(LocalDateTime.now())) {
             throw new BusinessRuleViolationsException("La fecha ingresada es invalida");
         }
-        return new PendingTask(null, type, PendingTaskStatus.PENDING, createdAt, null);
+        return new PendingTask(type, PendingTaskStatus.PENDING, createdAt, null);
     }
 
     public void markAsDone() {
@@ -42,6 +42,7 @@ public class PendingTask {
     public void setId(Long id) { this.id = id; }
     public PendingTaskType getType() { return type; }
     public PendingTaskStatus getStatus() { return status; }
+    public void setStatus(PendingTaskStatus status) { this.status = status;}
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getProcessedAt() { return processedAt; }
 }

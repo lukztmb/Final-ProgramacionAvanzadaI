@@ -12,7 +12,6 @@ public class User {
     private LocalDateTime activationExpiresAt;
     private LocalDateTime createdAt;
 
-    // Constructor privado
     private User(Long id, String email, String password, UserStatus status, LocalDateTime createdAt) {
         this.id = id;
         this.email = email;
@@ -35,7 +34,6 @@ public class User {
         return new User(null, email, password, UserStatus.PENDING, createdAt);
     }
 
-    // Comportamiento de dominio
     public void activate() {
         if (this.status != UserStatus.PENDING) {
             throw new BusinessRuleViolationsException("Solo usuarios pendientes pueden ser activados");
@@ -56,7 +54,6 @@ public class User {
     }
 
 
-    // Getters y Setters necesarios (ID se setea tras persistencia)
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getEmail() { return email; }
@@ -64,7 +61,7 @@ public class User {
     public UserStatus getStatus() { return status; }
     public String getActivationCode() { return activationCode; }
     public LocalDateTime getActivationExpiresAt() { return activationExpiresAt; }
-    public void serActivationCode(String activationCode) { this.activationCode = activationCode; }
+    public void setActivationCode(String activationCode) { this.activationCode = activationCode; }
     public void setExpiresAt(LocalDateTime expiresAt) { this.activationExpiresAt = expiresAt; }
     public LocalDateTime getCreatedAt() { return createdAt; }
 }
