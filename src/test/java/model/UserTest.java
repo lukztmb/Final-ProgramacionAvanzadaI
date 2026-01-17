@@ -66,15 +66,12 @@ public class UserTest {
        String messageEmail = exceptionEmail.getMessage();
        assertEquals(messageEmail,"El email es requerido");
 
-       System.out.println(messageEmail);
-
         Exception exceptionPassw = assertThrows(Exception.class, () -> {
             User.create("user1@test.com","",createdAt);
         });
         String messagePassw = exceptionPassw.getMessage();
         assertEquals(messagePassw,"La contraseña invalida");
 
-        System.out.println(messagePassw);
     }
 
     @Test
