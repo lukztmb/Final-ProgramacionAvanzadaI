@@ -30,6 +30,9 @@ public class UserMapper {
                     entity.getCreatedAt()
             );
 
+            user.setActivationCode(entity.getActivationCode());
+            user.setExpiresAt(entity.getActivationExpiresAt());
+
             return user;
         }catch (Exception e){
             throw new RuntimeException("Error Reconstruyendo el User desde la Persistencia",e);

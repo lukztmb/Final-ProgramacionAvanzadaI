@@ -21,7 +21,7 @@ public class DownloadGeneratedFiles {
 
     private final PendingTaskRepository pendingTaskRepository;
     private final OrderRepository orderRepository;
-    // Asignamos una ruta (en la raiz de la db) para guardar los archivos generados, los exports
+
     private final Path fileStorageLocation = Paths.get("exports").toAbsolutePath().normalize();
 
     public  DownloadGeneratedFiles(PendingTaskRepository pendingTaskRepository, OrderRepository orderRepository) {
@@ -60,16 +60,12 @@ public class DownloadGeneratedFiles {
     }
 
     private void processTask(PendingTask task) throws IOException {
-        // Obtenemos todas las ordenes de la db
         List<Order> listOrder = orderRepository.findAll();
 
-        // Construimos el csv
         StringBuilder csv = new StringBuilder();
 
-        // Agregamos la cabecera
         csv.append("ID,USER_EMAIL,AMOUNT,STATUS,CREATED_AT\n");
 
-        //Iteramos sobre las ordenes para cargar los datos
         for (Order order : listOrder) {
             csv.append(order.getId()).append(",");
             csv.append(order.getUser().getEmail()).append(",");
@@ -78,12 +74,10 @@ public class DownloadGeneratedFiles {
             csv.append(order.getCreatedAt()).append("\n");
         }
 
-        // Guardamos en el disco de la db
         Path target = fileStorageLocation.resolve(task.getId() + ".csv");
         Files.writeString(target, csv.toString());
 
 
-        // Actualizamos el estado
         task.markAsDone();
         pendingTaskRepository.save(task);
     }

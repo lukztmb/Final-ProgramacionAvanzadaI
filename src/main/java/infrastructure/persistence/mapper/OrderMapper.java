@@ -1,25 +1,32 @@
 package infrastructure.persistence.mapper;
 
 import domain.model.Order;
+import domain.model.OrderStatus;
 import domain.model.User;
 import infrastructure.persistence.entities.OrderEntity;
 import infrastructure.persistence.entities.UserEntity;
-import infrastructure.persistence.mapper.UserMapper;
 import org.springframework.stereotype.Component;
+
+import java.lang.reflect.Constructor;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Component
 public class OrderMapper {
 
+    private final UserMapper userMapper;
+
+    // Inyección de dependencia recomendada en lugar de 'new UserMapper()'
+    public OrderMapper(UserMapper userMapper) {
+        this.userMapper = userMapper;
+    }
+
     public OrderEntity toEntity(Order order) {
         if(order == null){return null;}
         OrderEntity entity = new OrderEntity();
-        User user = order.getUser();
-        UserEntity userEntity = new UserEntity();
-        userEntity.setId(user.getId());
-        userEntity.setEmail(user.getEmail());
-        userEntity.setPassword(user.getPassword());
-        userEntity.setStatus(user.getStatus());
-        userEntity.setCreatedAt(user.getCreatedAt());
+
+        UserEntity userEntity = userMapper.toUserEntity(order.getUser());
+
         entity.setId(order.getId());
         entity.setUser(userEntity);
         entity.setStatus(order.getStatus());
@@ -30,14 +37,30 @@ public class OrderMapper {
     }
 
     public Order toDomain(OrderEntity savedEntity) {
-        UserMapper userMapper = new UserMapper();
-        return Order.create(
-                userMapper.toUserDomain(savedEntity.getUser()),
-                savedEntity.getAmount(),
-                savedEntity.getCreatedAt()
-        );
+        if (savedEntity == null) return null;
+
+        try {
+
+            Constructor<Order> constructor = Order.class.getDeclaredConstructor(
+                    Long.class,
+                    User.class,
+                    OrderStatus.class,
+                    BigDecimal.class,
+                    LocalDateTime.class,
+                    LocalDateTime.class
+            );
+            constructor.setAccessible(true);
+
+            return constructor.newInstance(
+                    savedEntity.getId(),
+                    userMapper.toUserDomain(savedEntity.getUser()),
+                    savedEntity.getStatus(),
+                    savedEntity.getAmount(),
+                    savedEntity.getCreatedAt(),
+                    savedEntity.getUpdatedAt()
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("Error al reconstruir Order desde persistencia", e);
+        }
     }
-
-
-
 }

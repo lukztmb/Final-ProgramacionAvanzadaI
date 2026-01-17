@@ -8,4 +8,5 @@ import java.util.Optional;
 
 public interface IPendingTaskRepository extends JpaRepository<PendingTaskEntity, Long> {
     Optional<PendingTaskEntity> findFirstByStatus(PendingTaskStatus status);
+    Optional<PendingTaskEntity> findById(Long id);
 }

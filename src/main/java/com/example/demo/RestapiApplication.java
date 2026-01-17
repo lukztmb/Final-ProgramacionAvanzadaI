@@ -11,7 +11,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
         "domain",
         "infrastructure"
 })
-// linea para decirle dónde buscar las interfaces JPA
 @EnableJpaRepositories(basePackages = "infrastructure.persistence.repository")
 
 @EntityScan(basePackages = "infrastructure.persistence.entities")

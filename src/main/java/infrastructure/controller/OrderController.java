@@ -29,7 +29,7 @@ public class OrderController {
 
     private final CreateOrder createOrder;
     private final QueueExportOrdersTask queueExportOrdersTask;
-    private final PendingTaskRepository pendingTaskRepository; // Necesario para verificar estado antes de descargar
+    private final PendingTaskRepository pendingTaskRepository;
 
     public OrderController(CreateOrder createOrder,
                            QueueExportOrdersTask queueExportOrdersTask,
@@ -39,7 +39,6 @@ public class OrderController {
         this.pendingTaskRepository = pendingTaskRepository;
     }
 
-    // --- Endpoints de Ordenes ---
 
     @PostMapping("/users/{userId}/orders")
     public ResponseEntity<OrderResponseDTO> createOrder(
@@ -57,14 +56,12 @@ public class OrderController {
         return ResponseEntity.created(location).body(response);
     }
 
-    // --- Endpoints de Exportación ---
-
     @PostMapping("/orders/export/request")
     public ResponseEntity<PendingTaskResponseDTO> requestExport() {
         PendingTaskResponseDTO response = queueExportOrdersTask.execute();
 
         URI location = ServletUriComponentsBuilder
-                .fromCurrentContextPath() // Usamos context path para armar la url de descarga
+                .fromCurrentContextPath()
                 .path("/orders/export/{id}")
                 .buildAndExpand(response.id())
                 .toUri();
@@ -74,19 +71,12 @@ public class OrderController {
 
     @GetMapping("/orders/export/{taskId}")
     public ResponseEntity<Resource> downloadExport(@PathVariable Long taskId) {
-        // 1. Verificar que la tarea exista y esté terminada
         PendingTask task = pendingTaskRepository.findFirstPending()
                 .stream()
-                .filter(t -> t.getId().equals(taskId)) // Esto es ineficiente en producción (debería haber findById), pero usamos lo que hay.
+                .filter(t -> t.getId().equals(taskId))
                 .findFirst()
                 .orElse(null);
 
-        // Como el repository findFirstPending solo trae PENDIENTES, necesitamos buscar por ID directamente.
-        // Asumiendo que PendingTaskRepository es una interfaz que extiende JPA o similar,
-        // pero la interfaz provista en el código subido "domain.repository.PendingTaskRepository"
-        // no tiene findById. Debemos confiar en que la implementación o el flujo permite buscarla.
-        // Hack: Para el ejercicio, intentaremos descargar el archivo directamente si existe,
-        // asumiendo que el ID es correcto. En un entorno real, agregaría findById al repositorio del dominio.
 
         try {
             Path filePath = Paths.get("exports").resolve(taskId + ".csv").normalize();
@@ -98,7 +88,6 @@ public class OrderController {
                         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"orders_export_" + taskId + ".csv\"")
                         .body(resource);
             } else {
-                // Si el archivo no está, puede que la tarea siga pendiente o haya fallado
                 throw new ResourceNotFoundException("El archivo no está listo o no existe.");
             }
         } catch (MalformedURLException e) {

@@ -14,15 +14,18 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -31,6 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = RestapiApplication.class)
 @AutoConfigureMockMvc
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Transactional
 public class FullUserFlowIntegrationTest {
 
     @Autowired
@@ -47,7 +51,9 @@ public class FullUserFlowIntegrationTest {
     @Test
     @DisplayName("Flujo Completo: Registro -> Activación -> Orden -> Exportación -> Descarga")
     void fullUserLifecycleTest() throws Exception {
-        String email = "cleanflow@test.com";
+        // AGREGADO: Generamos un email único para evitar conflictos con ejecuciones pasadas fallidas
+        String uniqueId = UUID.randomUUID().toString().substring(0, 8);
+        String email = "test-" + uniqueId + "@cleanflow.com";
         String password = "securePassword123";
 
         // ==========================================
@@ -61,7 +67,6 @@ public class FullUserFlowIntegrationTest {
                 .andExpect(status().isCreated())
                 .andReturn();
 
-        // Parseamos respuesta manualmente con ObjectMapper para evitar JsonPath
         String registerResponseStr = registerResult.getResponse().getContentAsString();
         JsonNode registerJson = objectMapper.readTree(registerResponseStr);
 
@@ -74,11 +79,9 @@ public class FullUserFlowIntegrationTest {
         // ==========================================
         // 2. OBTENCIÓN DEL TOKEN (Simulación Backdoor)
         // ==========================================
-        // Accedemos al repositorio en memoria para obtener el código generado
         Optional<ActivationToken> tokenOpt = activationTokenRepository.findByEmail(email);
         assertTrue(tokenOpt.isPresent(), "El token debería haberse generado al registrar el usuario");
 
-        // Usamos reflexión para obtener el campo 'code' privado ya que no tiene getter público
         String tokenCode = getPrivateCode(tokenOpt.get());
 
         // ==========================================
@@ -115,9 +118,8 @@ public class FullUserFlowIntegrationTest {
         Long taskId = exportJson.get("id").asLong();
 
         // ==========================================
-        // 6. EJECUCIÓN MANUAL DEL JOB (Simular paso del tiempo)
+        // 6. EJECUCIÓN MANUAL DEL JOB
         // ==========================================
-        // Invocamos directamente el método que ejecuta el @Scheduled
         downloadGeneratedFiles.execute();
 
         // ==========================================
@@ -130,13 +132,11 @@ public class FullUserFlowIntegrationTest {
 
         String csvContent = downloadResult.getResponse().getContentAsString();
 
-        // Validamos contenido del CSV
         assertTrue(csvContent.contains("ID,USER_EMAIL,AMOUNT"), "El CSV debe contener la cabecera");
-        assertTrue(csvContent.contains(email), "El CSV debe contener el email del usuario");
-        assertTrue(csvContent.contains("150.50"), "El CSV debe contener el monto de la orden");
+        assertTrue(csvContent.contains(email), "El CSV debe contener el email dinámico del usuario");
+        assertTrue(csvContent.contains("150.50"), "El CSV debe contener el monto");
     }
 
-    // Método utilitario para reflexión pura (Java estándar)
     private String getPrivateCode(ActivationToken token) throws Exception {
         Field field = ActivationToken.class.getDeclaredField("code");
         field.setAccessible(true);

@@ -31,4 +31,10 @@ public class PendingTaskImp implements PendingTaskRepository {
     public Optional<PendingTask> findFirstPending() {
         return repository.findFirstByStatus(PendingTaskStatus.PENDING).map(mapper::toDomain);
     }
+
+    @Override
+    public Optional<PendingTask> findById(Long id){
+        return repository.findById(id).map(mapper::toDomain);
+    }
+
 }
