@@ -1,4 +1,4 @@
-package application.dto.usecase;
+package application.usecase;
 
 import application.dto.response.PendingTaskResponseDTO;
 import application.usecase.QueueExportOrdersTask;
@@ -30,14 +30,17 @@ public class QueueExportOrdersTaskTest {
 
     @Test
     void shouldCreateExportTaskSuccessfully() {
+        // Simulamos la respuesta
         when(pendingTaskRepository.save(any(PendingTask.class))).thenAnswer(invocation -> {
             PendingTask task = invocation.getArgument(0);
             task.setId(100L);
             return task;
         });
 
+        // Ekecutamos el caso de uso
         PendingTaskResponseDTO response = queueExportOrdersTask.execute();
 
+        //validamos
         assertNotNull(response);
         assertEquals(100L, response.id());
         assertEquals(PendingTaskType.EXPORT_ORDERS.toString(), response.type());
@@ -50,5 +53,22 @@ public class QueueExportOrdersTaskTest {
         assertEquals(PendingTaskType.EXPORT_ORDERS, task.getType());
         assertEquals(PendingTaskStatus.PENDING, task.getStatus());
         assertNotNull(task.getCreatedAt());
+    }
+
+    @Test
+    void shouldCreateExportTaskFailureIfExceptionOccurred() {
+        // Simulamos que el repositorio lanza una excepcion
+        String errorMessage = "Database error";
+        when(pendingTaskRepository.save(any(PendingTask.class)))
+                .thenThrow(new RuntimeException(errorMessage));
+
+        // Verificamos que al ejecutar el caso de uso, la excepcion se propague
+        RuntimeException exception = org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> {
+            queueExportOrdersTask.execute();
+        });
+
+        // Verificamos el mensaje y si se llamo al metodo
+        assertEquals(errorMessage, exception.getMessage());
+        verify(pendingTaskRepository).save(any(PendingTask.class));
     }
 }

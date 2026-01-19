@@ -1,4 +1,4 @@
-package application.dto.usecase;
+package application.usecase;
 
 
 import application.usecase.ActivateUser;

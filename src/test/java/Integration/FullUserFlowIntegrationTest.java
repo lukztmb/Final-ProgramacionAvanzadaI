@@ -1,9 +1,10 @@
-package com.example.demo;
+package Integration;
 
 import application.dto.request.ActivateUserRequestDTO;
 import application.dto.request.OrderRequestDTO;
 import application.dto.request.UserRequestDTO;
 import application.usecase.DownloadGeneratedFiles;
+import com.example.demo.RestapiApplication;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -51,14 +52,12 @@ public class FullUserFlowIntegrationTest {
     @Test
     @DisplayName("Flujo Completo: Registro -> Activación -> Orden -> Exportación -> Descarga")
     void fullUserLifecycleTest() throws Exception {
-        // AGREGADO: Generamos un email único para evitar conflictos con ejecuciones pasadas fallidas
         String uniqueId = UUID.randomUUID().toString().substring(0, 8);
-        String email = "test-" + uniqueId + "@cleanflow.com";
+        //String email = "test-" + uniqueId + "@cleanflow.com";
+        String email = "joacosuilar@gmail.com";
         String password = "securePassword123";
 
-        // ==========================================
-        // 1. REGISTRO DE USUARIO
-        // ==========================================
+        // REGISTRO DE USUARIO
         UserRequestDTO registerRequest = new UserRequestDTO(email, password);
 
         MvcResult registerResult = mockMvc.perform(post("/users")
@@ -76,17 +75,13 @@ public class FullUserFlowIntegrationTest {
         assertEquals("PENDING", userStatus);
         assertNotNull(userId);
 
-        // ==========================================
-        // 2. OBTENCIÓN DEL TOKEN (Simulación Backdoor)
-        // ==========================================
+        // OBTENCIÓN DEL TOKEN (Simulación Backdoor)
         Optional<ActivationToken> tokenOpt = activationTokenRepository.findByEmail(email);
         assertTrue(tokenOpt.isPresent(), "El token debería haberse generado al registrar el usuario");
 
         String tokenCode = getPrivateCode(tokenOpt.get());
 
-        // ==========================================
-        // 3. ACTIVACIÓN DE USUARIO
-        // ==========================================
+        // ACTIVACIÓN DE USUARIO
         ActivateUserRequestDTO activateRequest = new ActivateUserRequestDTO(email, tokenCode);
 
         mockMvc.perform(post("/users/activate")
@@ -94,9 +89,7 @@ public class FullUserFlowIntegrationTest {
                         .content(objectMapper.writeValueAsString(activateRequest)))
                 .andExpect(status().isNoContent());
 
-        // ==========================================
-        // 4. CREACIÓN DE ORDEN
-        // ==========================================
+        // CREACIÓN DE ORDEN
         OrderRequestDTO orderRequest = new OrderRequestDTO(new BigDecimal("150.50"));
 
         mockMvc.perform(post("/users/" + userId + "/orders")
@@ -105,9 +98,7 @@ public class FullUserFlowIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(content().json("{\"amount\":150.50,\"status\":\"PENDING\"}"));
 
-        // ==========================================
-        // 5. SOLICITUD DE EXPORTACIÓN (Generar Tarea)
-        // ==========================================
+        // SOLICITUD DE EXPORTACIÓN (Generar Tarea)
         MvcResult exportResult = mockMvc.perform(post("/orders/export/request")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isAccepted())
@@ -117,14 +108,10 @@ public class FullUserFlowIntegrationTest {
         JsonNode exportJson = objectMapper.readTree(exportResponseStr);
         Long taskId = exportJson.get("id").asLong();
 
-        // ==========================================
-        // 6. EJECUCIÓN MANUAL DEL JOB
-        // ==========================================
+        // EJECUCIÓN MANUAL DEL JOB
         downloadGeneratedFiles.execute();
 
-        // ==========================================
-        // 7. DESCARGA DEL ARCHIVO GENERADO
-        // ==========================================
+        // DESCARGA DEL ARCHIVO GENERADO
         MvcResult downloadResult = mockMvc.perform(get("/orders/export/" + taskId))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Type", "text/csv"))
