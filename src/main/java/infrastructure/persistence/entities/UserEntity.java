@@ -30,12 +30,6 @@ public class UserEntity {
     private UserStatus status;
 
     @Column(nullable = false)
-    private String activationCode;
-
-    @Column(nullable = false)
-    private LocalDateTime activationExpiresAt;
-
-    @Column(nullable = false)
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -53,10 +47,6 @@ public class UserEntity {
     public String getEmail() { return email; }
     public String getPassword() { return password; }
     public UserStatus getStatus() { return status; }
-    public String getActivationCode() { return activationCode; }
-    public LocalDateTime getActivationExpiresAt() { return activationExpiresAt; }
-    public void serActivationCode(String activationCode) { this.activationCode = activationCode; }
-    public void setExpiresAt(LocalDateTime expiresAt) { this.activationExpiresAt = expiresAt; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public List<OrderEntity> getOrders (){return orders;}
     public void setOrders(List<OrderEntity> orders) {this.orders = orders;}
