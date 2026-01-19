@@ -1,12 +1,11 @@
 package infrastructure.persistence.repository.interfaces;
 
-import domain.model.PendingTaskStatus;
 import infrastructure.persistence.entities.PendingTaskEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface IPendingTaskRepository extends JpaRepository<PendingTaskEntity, Long> {
-    Optional<PendingTaskEntity> findFirstByStatus(PendingTaskStatus status);
-    Optional<PendingTaskEntity> findById(Long id);
+    List<PendingTaskEntity> findByStatus(String status);
 }

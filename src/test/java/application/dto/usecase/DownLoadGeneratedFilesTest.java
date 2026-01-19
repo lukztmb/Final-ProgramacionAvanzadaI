@@ -1,20 +1,29 @@
 package application.dto.usecase;
 
 import application.usecase.DownloadGeneratedFiles;
+import application.usecase.ProcessPendingTask;
 import domain.model.*;
 import domain.repository.OrderRepository;
 import domain.repository.PendingTaskRepository;
+import infrastructure.exception.ResourceNotFoundException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.io.Resource;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
@@ -23,63 +32,76 @@ public class DownLoadGeneratedFilesTest {
     @Mock
     private PendingTaskRepository pendingTaskRepository;
 
-    @Mock
-    private OrderRepository orderRepository;
-
     @InjectMocks
     private DownloadGeneratedFiles downloadGeneratedFiles;
 
-    @Test
-    void shouldProcessPendingTaskSuccessfully() {
-        LocalDateTime now = LocalDateTime.now();
-        PendingTask pendingTask = PendingTask.create(PendingTaskType.EXPORT_ORDERS, now);
-        pendingTask.setId(1L);
+    private Path tempFile;
 
-        when(pendingTaskRepository.findFirstPending()).thenReturn(Optional.of(pendingTask));
-
-        // Creamos un usuario valido para crear ordenes
-        User user = User.create("testUser@gmail.com", "pass1234", now);
-        user.activate();
-        user.setExpiresAt(LocalDateTime.now().plusDays(1));
-
-        // Creamos una orden para poder generar el csv
-        Order order = Order.create(user, new BigDecimal("150.00"),now);
-        order.setId(1L);
-
-        when(orderRepository.findAll()).thenReturn(List.of(order));
-
-        downloadGeneratedFiles.execute();
-
-        verify(pendingTaskRepository).findFirstPending();
-        verify(orderRepository).findAll();
-
-        verify(pendingTaskRepository).save(argThat(t ->
-                t.getStatus() == PendingTaskStatus.DONE &&
-                t.getProcessedAt() != null));
+    @BeforeEach
+    void setUp() throws IOException {
+        tempFile = Files.createTempFile("test_report", ".csv");
+        Files.writeString(tempFile, "CONTENIDO, DE, PRUEBA");
     }
 
-    @Test
-    void shouldDoNothingWhenNoPendingTasksAreFound() {
-        when(pendingTaskRepository.findFirstPending()).thenReturn(Optional.empty());
-
-        downloadGeneratedFiles.execute();
-
-        verify(pendingTaskRepository, never()).save(any());
-        verify(orderRepository, never()).findAll();
+    @AfterEach
+    void tearDown() throws IOException {
+        // Borramos el archivo temporal
+        Files.deleteIfExists(tempFile);
     }
-
     @Test
-    void shouldMarkAsErrorIfExceptionOccurred() {
+    void shouldReturnResourceWhenTaskIsDoneAndFileExists() throws IOException {
+        Long taskId = 1L;
         PendingTask task = PendingTask.create(PendingTaskType.EXPORT_ORDERS, LocalDateTime.now());
-        task.setId(2L);
-        when(pendingTaskRepository.findFirstPending()).thenReturn(Optional.of(task));
 
-        when(orderRepository.findAll()).thenThrow(new RuntimeException("Database error"));
+        // Forzamos estado DONE y seteamos el path del archivo temporal creado
+        task.markAsDone(tempFile.toAbsolutePath().toString());
 
-        downloadGeneratedFiles.execute();
+        when(pendingTaskRepository.findById(taskId)).thenReturn(Optional.of(task));
 
-        verify(pendingTaskRepository).save(argThat(t ->
-                t.getStatus() == PendingTaskStatus.ERROR &&
-                t.getProcessedAt() != null));
+        Resource resource = downloadGeneratedFiles.execute(taskId);
+
+        assertNotNull(resource);
+        assertTrue(resource.exists());
+        assertTrue(resource.isReadable());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenTaskNotFound() {
+        Long taskId = 99L;
+        when(pendingTaskRepository.findById(taskId)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () ->
+                downloadGeneratedFiles.execute(taskId)
+        );
+    }
+
+    @Test
+    void shouldThrowExceptionWhenTaskIsNotDone() {
+        Long taskId = 1L;
+        PendingTask task = PendingTask.create(PendingTaskType.EXPORT_ORDERS, LocalDateTime.now());
+        // El estado inicial es PENDING
+
+        when(pendingTaskRepository.findById(taskId)).thenReturn(Optional.of(task));
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () ->
+                downloadGeneratedFiles.execute(taskId)
+        );
+        assertEquals("La tarea todavia no ha finalizado", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenPhysicalFileDoesNotExist() {
+        Long taskId = 1L;
+        PendingTask task = PendingTask.create(PendingTaskType.EXPORT_ORDERS, LocalDateTime.now());
+
+        // Seteamos una ruta falsa que no existe
+        task.markAsDone("Ruta/Inexistente/archivo.csv");
+
+        when(pendingTaskRepository.findById(taskId)).thenReturn(Optional.of(task));
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () ->
+                downloadGeneratedFiles.execute(taskId)
+        );
+        assertEquals("El archivo no existe", exception.getMessage());
     }
 }

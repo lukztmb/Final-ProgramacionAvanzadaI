@@ -15,22 +15,6 @@ public class PendingTaskMapper {
             return null;
         }
         try{
-            /*
-            Constructor<PendingTask> constructor = PendingTask.class.getDeclaredConstructor(Long.class,
-                    PendingTaskType.class,
-                    PendingTaskEntity.class,
-                    LocalDateTime.class,
-                    LocalDateTime.class);
-            constructor.setAccessible(true);
-            return constructor.newInstance(
-                    task.getId(),
-                    task.getType(),
-                    task.getStatus(),
-                    task.getCreatedAt(),
-                    task.getProccessedAt()
-            );
-
-             */
 
             PendingTask domainTask = PendingTask.create(
                     task.getType(),
