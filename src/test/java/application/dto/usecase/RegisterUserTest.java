@@ -3,11 +3,10 @@ package application.dto.usecase;
 import application.dto.request.UserRequestDTO;
 import application.dto.response.UserResponseDTO;
 import application.usecase.RegisterUser;
+import domain.model.ActivationToken;
 import domain.repository.ActivationTokenRepository;
 import domain.repository.UserRepository;
 import infrastructure.exception.BusinessRuleViolationsException;
-import infrastructure.repository.InMemoryActivationTokenRepository;
-import org.apache.catalina.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
@@ -22,30 +21,30 @@ import static org.mockito.Mockito.*;
 public class RegisterUserTest {
 
     private UserRepository userRepository;
+    private ActivationTokenRepository tokenRepository; // Nuevo mock necesario
     private RegisterUser registerUser;
-    private ActivationTokenRepository tokenRepository;
 
     @BeforeEach
     void setUp() {
-
         userRepository = mock(UserRepository.class);
-        tokenRepository = mock(InMemoryActivationTokenRepository.class);
-        registerUser = new RegisterUser(userRepository);
+        tokenRepository = mock(ActivationTokenRepository.class); // Mockeamos el repositorio de tokens
+
+        // Inyectamos ambos repositorios
+        registerUser = new RegisterUser(userRepository, tokenRepository);
     }
 
     @Test
     @Order(1)
     @DisplayName("Register_Use")
-
     void shouldRegisterUserSuccessfully(){
-        UserRequestDTO request = new UserRequestDTO("ejemplo@test.com",
-                "passwExample");
+        UserRequestDTO request = new UserRequestDTO("ejemplo@test.com", "passwExample");
 
-        //simulamos que existe este email no existe
+        // simulamos que este email no existe
         when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
-        //simulamos el guardado y retornamos el mismo usuario con id seteado
+
+        // simulamos el guardado y retornamos el mismo usuario con id seteado
         when(userRepository.save(any())).thenAnswer(i -> {
-            domain.model.User u =i.getArgument(0);
+            domain.model.User u = i.getArgument(0);
             u.setId(1L);
             return u;
         });
@@ -53,11 +52,13 @@ public class RegisterUserTest {
         UserResponseDTO responseDTO = registerUser.registerUser(request);
 
         assertNotNull(responseDTO);
-        assertEquals("ejemplo@test.com",responseDTO.email());
+        assertEquals("ejemplo@test.com", responseDTO.email());
         assertEquals("PENDING", responseDTO.status());
 
         verify(userRepository, times(1)).save(any());
 
+        // Verificamos que también se guarde el token
+        verify(tokenRepository, times(1)).save(any(ActivationToken.class));
     }
 
     @Test
@@ -74,6 +75,7 @@ public class RegisterUserTest {
 
         assertEquals("Email ya esta registrado", exception.getMessage());
         verify(userRepository, never()).save(any());
+        verify(tokenRepository, never()).save(any()); // No se debe guardar token si falla
     }
 
     @Test
@@ -85,7 +87,4 @@ public class RegisterUserTest {
 
         assertThrows(BusinessRuleViolationsException.class, () -> registerUser.registerUser(request));
     }
-
 }
-
-

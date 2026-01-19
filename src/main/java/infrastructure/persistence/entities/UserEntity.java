@@ -55,7 +55,7 @@ public class UserEntity {
     public UserStatus getStatus() { return status; }
     public String getActivationCode() { return activationCode; }
     public LocalDateTime getActivationExpiresAt() { return activationExpiresAt; }
-    public void serActivationCode(String activationCode) { this.activationCode = activationCode; }
+    public void setActivationCode(String activationCode) { this.activationCode = activationCode; }
     public void setExpiresAt(LocalDateTime expiresAt) { this.activationExpiresAt = expiresAt; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public List<OrderEntity> getOrders (){return orders;}

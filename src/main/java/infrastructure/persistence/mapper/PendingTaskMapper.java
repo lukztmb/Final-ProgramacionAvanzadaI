@@ -15,6 +15,7 @@ public class PendingTaskMapper {
             return null;
         }
         try{
+            /*
             Constructor<PendingTask> constructor = PendingTask.class.getDeclaredConstructor(Long.class,
                     PendingTaskType.class,
                     PendingTaskEntity.class,
@@ -28,6 +29,16 @@ public class PendingTaskMapper {
                     task.getCreatedAt(),
                     task.getProccessedAt()
             );
+
+             */
+
+            PendingTask domainTask = PendingTask.create(
+                    task.getType(),
+                    task.getCreatedAt());
+            domainTask.setId(task.getId());
+            domainTask.setStatus(task.getStatus());
+            return domainTask;
+
         } catch (Exception e) {
             throw new RuntimeException("Error en el maping PendingTaskMapper.toDomain", e);
         }
