@@ -29,10 +29,10 @@ public class UserEntity {
     @Column(nullable = false)
     private UserStatus status;
 
-    @Column(nullable = false)
+    @Column(name = "activation_code")
     private String activationCode;
 
-    @Column(nullable = false)
+    @Column(name = "activation_expires_at")
     private LocalDateTime activationExpiresAt;
 
     @Column(nullable = false)
@@ -47,19 +47,4 @@ public class UserEntity {
         orders.add(order);
         order.setUser(this);
     }
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getEmail() { return email; }
-    public String getPassword() { return password; }
-    public UserStatus getStatus() { return status; }
-    public String getActivationCode() { return activationCode; }
-    public LocalDateTime getActivationExpiresAt() { return activationExpiresAt; }
-    public void setActivationCode(String activationCode) { this.activationCode = activationCode; }
-    public void setExpiresAt(LocalDateTime expiresAt) { this.activationExpiresAt = expiresAt; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public List<OrderEntity> getOrders (){return orders;}
-    public void setOrders(List<OrderEntity> orders) {this.orders = orders;}
-
-
 }
