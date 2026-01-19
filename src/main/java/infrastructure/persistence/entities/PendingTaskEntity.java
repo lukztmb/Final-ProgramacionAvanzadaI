@@ -30,6 +30,8 @@ public class PendingTaskEntity {
 
     private LocalDateTime proccessedAt;
 
+    private String fileContentPath;
+
     public PendingTaskEntity() {}
 
 }
