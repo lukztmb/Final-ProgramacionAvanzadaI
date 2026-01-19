@@ -71,10 +71,7 @@ public class OrderController {
 
     @GetMapping("/orders/export/{taskId}")
     public ResponseEntity<Resource> downloadExport(@PathVariable Long taskId) {
-        PendingTask task = pendingTaskRepository.findFirstPending()
-                .stream()
-                .filter(t -> t.getId().equals(taskId))
-                .findFirst()
+        PendingTask task = pendingTaskRepository.findById(taskId)
                 .orElse(null);
 
 
