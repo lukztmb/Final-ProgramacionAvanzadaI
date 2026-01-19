@@ -5,12 +5,15 @@ import domain.repository.PendingTaskRepository;
 import infrastructure.persistence.entities.PendingTaskEntity;
 import infrastructure.persistence.mapper.PendingTaskMapper;
 import infrastructure.persistence.repository.interfaces.IPendingTaskRepository;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-@Repository
+@Component
 @RequiredArgsConstructor
 public class PendingTaskImp implements PendingTaskRepository {
 
@@ -27,7 +30,12 @@ public class PendingTaskImp implements PendingTaskRepository {
     }
 
     @Override
-    public Optional<PendingTask> findFirstPending() {
-        return repository.findByPending().map(mapper::toDomain);
+    public Optional<PendingTask> findById(Long id) {
+        return repository.findById(id).map(mapper::toDomain);
+    }
+
+    @Override
+    public List<PendingTask> findByStatus(String status) {
+        return repository.findByStatus(status).stream().map(mapper::toDomain).collect(Collectors.toList());
     }
 }

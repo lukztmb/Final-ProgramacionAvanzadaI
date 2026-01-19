@@ -15,19 +15,14 @@ public class PendingTaskMapper {
             return null;
         }
         try{
-            Constructor<PendingTask> constructor = PendingTask.class.getDeclaredConstructor(Long.class,
-                    PendingTaskType.class,
-                    PendingTaskEntity.class,
-                    LocalDateTime.class,
-                    LocalDateTime.class);
-            constructor.setAccessible(true);
-            return constructor.newInstance(
-                    task.getId(),
+
+            PendingTask domainTask = PendingTask.create(
                     task.getType(),
-                    task.getStatus(),
-                    task.getCreatedAt(),
-                    task.getProccessedAt()
-            );
+                    task.getCreatedAt());
+            domainTask.setId(task.getId());
+            domainTask.setStatus(task.getStatus());
+            return domainTask;
+
         } catch (Exception e) {
             throw new RuntimeException("Error en el maping PendingTaskMapper.toDomain", e);
         }

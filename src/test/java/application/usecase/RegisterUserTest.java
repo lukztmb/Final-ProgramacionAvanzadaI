@@ -1,7 +1,9 @@
-package application.dto.usecase;
+package application.usecase;
 
 import application.dto.request.UserRequestDTO;
 import application.dto.response.UserResponseDTO;
+import application.ports.EmailServices;
+import application.services.ActivationTokenServices;
 import application.usecase.RegisterUser;
 import domain.repository.UserRepository;
 import infrastructure.exception.BusinessRuleViolationsException;
@@ -20,6 +22,10 @@ public class RegisterUserTest {
 
     private UserRepository userRepository;
     private RegisterUser registerUser;
+
+    private ActivationTokenServices activationTokenServices;
+    private EmailServices emailServices;
+
     private ActivationTokenRepository tokenRepository;
 
     @BeforeEach
@@ -27,7 +33,11 @@ public class RegisterUserTest {
 
         userRepository = mock(UserRepository.class);
         tokenRepository = mock(InMemoryActivationTokenRepository.class);
-        registerUser = new RegisterUser(userRepository);
+
+        activationTokenServices = mock(ActivationTokenServices.class);
+        emailServices = mock(EmailServices.class);
+
+        registerUser = new RegisterUser(userRepository, activationTokenServices, emailServices);
     }
 
     @Test

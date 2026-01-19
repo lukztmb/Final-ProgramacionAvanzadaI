@@ -1,21 +1,27 @@
 package domain.model;
 
 import infrastructure.exception.BusinessRuleViolationsException;
+import lombok.Getter;
+
 import java.time.LocalDateTime;
 
+@Getter
 public class PendingTask {
     private Long id;
     private PendingTaskType type;
     private PendingTaskStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime processedAt;
+    private String fileContentPath;
 
-    private PendingTask(Long id, PendingTaskType type, PendingTaskStatus status, LocalDateTime createdAt, LocalDateTime processedAt) {
+    private PendingTask(Long id, PendingTaskType type, PendingTaskStatus status, LocalDateTime createdAt,
+                        LocalDateTime processedAt,  String fileContentPath) {
         this.id = id;
         this.type = type;
         this.status = status;
         this.createdAt = createdAt;
         this.processedAt = processedAt;
+        this.fileContentPath = fileContentPath;
     }
 
     public static PendingTask create(PendingTaskType type, LocalDateTime createdAt) {
@@ -25,12 +31,13 @@ public class PendingTask {
         if (createdAt == null || createdAt.isAfter(LocalDateTime.now())) {
             throw new BusinessRuleViolationsException("La fecha ingresada es invalida");
         }
-        return new PendingTask(null, type, PendingTaskStatus.PENDING, createdAt, null);
+        return new PendingTask(null, type, PendingTaskStatus.PENDING, createdAt, null, null);
     }
 
-    public void markAsDone() {
+    public void markAsDone(String fileContentPath) {
         this.status = PendingTaskStatus.DONE;
         this.processedAt = LocalDateTime.now();
+        this.fileContentPath = fileContentPath;
     }
 
     public void markAsError() {
@@ -38,10 +45,7 @@ public class PendingTask {
         this.processedAt = LocalDateTime.now();
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public PendingTaskType getType() { return type; }
-    public PendingTaskStatus getStatus() { return status; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public LocalDateTime getProcessedAt() { return processedAt; }
+    public void setId(Long id) {this.id = id;}
+
+    public void setStatus(PendingTaskStatus status) { this.status = status;}
 }
