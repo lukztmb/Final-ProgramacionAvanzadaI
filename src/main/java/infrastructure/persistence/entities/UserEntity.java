@@ -42,12 +42,6 @@ public class UserEntity {
         order.setUser(this);
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getEmail() { return email; }
-    public String getPassword() { return password; }
-    public UserStatus getStatus() { return status; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
     public List<OrderEntity> getOrders (){return orders;}
     public void setOrders(List<OrderEntity> orders) {this.orders = orders;}
 

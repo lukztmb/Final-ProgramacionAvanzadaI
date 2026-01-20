@@ -39,8 +39,11 @@ public class User {
             throw new BusinessRuleViolationsException("Solo usuarios pendientes pueden ser activados");
         }
         this.status = UserStatus.ACTIVE;
-    }
 
+    }
+    public boolean isActive(){
+        return this.status == UserStatus.ACTIVE;
+    }
     // Getters y Setters necesarios (ID se setea tras persistencia)
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
