@@ -36,7 +36,7 @@ public class ProcessPendingTask {
     @Scheduled(fixedDelay = 10000)
     @Transactional
     public void execute() {
-        List<PendingTask> tasks = pendingTaskRepository.findByStatus(PendingTaskStatus.PENDING.toString());
+        List<PendingTask> tasks = pendingTaskRepository.findByStatus(PendingTaskStatus.PENDING);
 
         for (PendingTask task : tasks) {
             if (task.getType() == PendingTaskType.EXPORT_ORDERS) {

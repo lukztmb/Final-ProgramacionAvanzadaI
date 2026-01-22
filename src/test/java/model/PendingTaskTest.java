@@ -1,9 +1,11 @@
 package model;
+
 import domain.model.PendingTask;
 import domain.model.PendingTaskStatus;
 import domain.model.PendingTaskType;
 import infrastructure.exception.BusinessRuleViolationsException;
 import org.junit.jupiter.api.*;
+
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -17,7 +19,6 @@ public class PendingTaskTest {
     @BeforeEach
     void setUp() {
         createdAt = LocalDateTime.now();
-        // Usamos el enum que me pasaste
         taskType = PendingTaskType.EXPORT_ORDERS;
     }
 
@@ -28,24 +29,23 @@ public class PendingTaskTest {
         PendingTask task = PendingTask.create(taskType, createdAt);
 
         assertNotNull(task);
-        // Verificamos que arranque en PENDING
+
         assertEquals(PendingTaskStatus.PENDING, task.getStatus());
         assertEquals(taskType, task.getType());
         assertNull(task.getProcessedAt());
+        assertNull(task.getFileContentPath());
     }
 
     @Test
     @org.junit.jupiter.api.Order(2)
     @DisplayName("failure_Task_Creation_Attributes")
     void failure_Task_Creation_Attributes() {
-        // Test tipo nulo
         BusinessRuleViolationsException exceptionType = assertThrows(
                 BusinessRuleViolationsException.class, () -> {
                     PendingTask.create(null, createdAt);
                 });
         assertEquals("El tipo de tarea es requerido", exceptionType.getMessage());
 
-        // Test fecha invalida (futura)
         LocalDateTime futureDate = LocalDateTime.now().plusDays(1);
         BusinessRuleViolationsException exceptionDate = assertThrows(
                 BusinessRuleViolationsException.class, () -> {
@@ -59,12 +59,13 @@ public class PendingTaskTest {
     @DisplayName("mark_Task_As_Done")
     void mark_Task_As_Done() {
         PendingTask task = PendingTask.create(taskType, createdAt);
+        String fakePath = "/tmp/file.csv";
 
-        task.markAsDone();
+        task.markAsDone(fakePath);
 
-        // Verificamos cambio a DONE y que se guarde la fecha de proceso
         assertEquals(PendingTaskStatus.DONE, task.getStatus());
         assertNotNull(task.getProcessedAt());
+        assertEquals(fakePath, task.getFileContentPath());
     }
 
     @Test
@@ -75,7 +76,6 @@ public class PendingTaskTest {
 
         task.markAsError();
 
-        // Verificamos cambio a ERROR
         assertEquals(PendingTaskStatus.ERROR, task.getStatus());
         assertNotNull(task.getProcessedAt());
     }

@@ -43,7 +43,7 @@ public class ProcessPendingTaskTest {
         task.setId(1L);
 
         // Simulamos que el repositorio devuelve una tarea pendiente
-        when(pendingTaskRepository.findByStatus(PendingTaskStatus.PENDING.toString()))
+        when(pendingTaskRepository.findByStatus(PendingTaskStatus.PENDING))
                 .thenReturn(List.of(task));
 
         // Simulamos datos de ordenes
@@ -78,7 +78,7 @@ public class ProcessPendingTaskTest {
 
     @Test
     void shouldDoNothingWhenNoPendingTasks() {
-        when(pendingTaskRepository.findByStatus(PendingTaskStatus.PENDING.toString()))
+        when(pendingTaskRepository.findByStatus(PendingTaskStatus.PENDING))
                 .thenReturn(Collections.emptyList());
 
         processPendingTask.execute();
@@ -92,7 +92,7 @@ public class ProcessPendingTaskTest {
         PendingTask task = PendingTask.create(PendingTaskType.EXPORT_ORDERS, LocalDateTime.now());
         task.setId(2L);
 
-        when(pendingTaskRepository.findByStatus(PendingTaskStatus.PENDING.toString()))
+        when(pendingTaskRepository.findByStatus(PendingTaskStatus.PENDING))
                 .thenReturn(List.of(task));
 
         // Simulamos error en la DB de ordenes

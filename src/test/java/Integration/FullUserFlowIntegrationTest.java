@@ -4,6 +4,7 @@ import application.dto.request.OrderRequestDTO;
 import application.dto.request.UserRequestDTO;
 import application.usecase.ActivateUser;
 import application.usecase.DownloadGeneratedFiles;
+import application.usecase.ProcessPendingTask;
 import com.example.demo.RestapiApplication;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,12 +40,14 @@ public class FullUserFlowIntegrationTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private ActivateUser activateUser; // Inyectamos el Job de Activación
+    private ActivateUser activateUser;
 
     @Autowired
-    private DownloadGeneratedFiles downloadGeneratedFiles; // Inyectamos el Job de Descarga
+    private DownloadGeneratedFiles downloadGeneratedFiles;
 
-    // Mapper manual para evitar problemas de inyección en tests
+    @Autowired
+    private ProcessPendingTask processPendingTask;
+
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
     @Test
@@ -93,7 +96,9 @@ public class FullUserFlowIntegrationTest {
         JsonNode exportJson = objectMapper.readTree(exportResult.getResponse().getContentAsString());
         Long taskId = exportJson.get("id").asLong();
 
-        // File generation
+        // Task processing
+        processPendingTask.execute();
+
         downloadGeneratedFiles.execute(taskId);
 
         // Download file
