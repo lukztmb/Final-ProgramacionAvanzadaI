@@ -15,13 +15,13 @@ public class PendingTask {
     private String fileContentPath;
 
     private PendingTask(Long id, PendingTaskType type, PendingTaskStatus status, LocalDateTime createdAt,
-                        LocalDateTime processedAt) {
+                        LocalDateTime processedAt, String fileContentPath) {
         this.id = id;
         this.type = type;
         this.status = status;
         this.createdAt = createdAt;
         this.processedAt = processedAt;
-        this.fileContentPath = "";
+        this.fileContentPath = fileContentPath != null ? fileContentPath : "";
     }
 
     public static PendingTask create(PendingTaskType type, LocalDateTime createdAt) {
@@ -31,7 +31,7 @@ public class PendingTask {
         if (createdAt == null || createdAt.isAfter(LocalDateTime.now())) {
             throw new BusinessRuleViolationsException("La fecha ingresada es invalida");
         }
-        return new PendingTask(null, type, PendingTaskStatus.PENDING, createdAt, null);
+        return new PendingTask(null, type, PendingTaskStatus.PENDING, createdAt, null, "");
     }
 
     public void markAsDone(String fileContentPath) {

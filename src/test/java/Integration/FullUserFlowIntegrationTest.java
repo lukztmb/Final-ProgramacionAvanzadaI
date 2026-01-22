@@ -109,8 +109,7 @@ public class FullUserFlowIntegrationTest {
 
         String csvContent = downloadResult.getResponse().getContentAsString();
 
-        // Validaciones finales
-        assertTrue(csvContent.contains("ID,USER_EMAIL,AMOUNT"), "Debe tener cabecera");
+        assertTrue(csvContent.contains("ID, EMAIL, AMOUNT, STATUS, CREATED_AT"), "Debe tener cabecera");
         assertTrue(csvContent.contains(email), "Debe contener el email del usuario creado");
         assertTrue(csvContent.contains("150.50"), "Debe contener el monto de la orden");
     }

@@ -4,33 +4,32 @@ import application.dto.request.OrderRequestDTO;
 import application.dto.response.OrderResponseDTO;
 import application.dto.response.PendingTaskResponseDTO;
 import application.usecase.CreateOrder;
+import application.usecase.DownloadGeneratedFiles;
 import application.usecase.QueueExportOrdersTask;
-import infrastructure.exception.ResourceNotFoundException;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 @RestController
 public class OrderController {
 
     private final CreateOrder createOrder;
     private final QueueExportOrdersTask queueExportOrdersTask;
+    private final DownloadGeneratedFiles downloadGeneratedFiles;
 
     public OrderController(CreateOrder createOrder,
-                           QueueExportOrdersTask queueExportOrdersTask) {
+                           QueueExportOrdersTask queueExportOrdersTask,
+                           DownloadGeneratedFiles downloadGeneratedFiles) {
         this.createOrder = createOrder;
         this.queueExportOrdersTask = queueExportOrdersTask;
+        this.downloadGeneratedFiles = downloadGeneratedFiles;
     }
 
 
@@ -65,20 +64,11 @@ public class OrderController {
 
     @GetMapping("/orders/export/{taskId}")
     public ResponseEntity<@NonNull Resource> downloadExport(@PathVariable Long taskId) {
-        try {
-            Path filePath = Paths.get("exports").resolve(taskId + ".csv").normalize();
-            Resource resource = new UrlResource(filePath.toUri());
+        Resource resource = downloadGeneratedFiles.execute(taskId);
 
-            if (resource.exists() && resource.isReadable()) {
-                return ResponseEntity.ok()
-                        .contentType(MediaType.parseMediaType("text/csv"))
-                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"orders_export_" + taskId + ".csv\"")
-                        .body(resource);
-            } else {
-                throw new ResourceNotFoundException("El archivo no está listo o no existe.");
-            }
-        } catch (MalformedURLException e) {
-            throw new RuntimeException("Error al leer la ruta del archivo", e);
-        }
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("text/csv"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"orders_export_" + taskId + ".csv\"")
+                .body(resource);
     }
 }
