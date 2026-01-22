@@ -1,6 +1,5 @@
-package application.dto.usecase;
+package application.usecase;
 
-import application.usecase.ProcessPendingTask;
 import domain.model.*;
 import domain.repository.OrderRepository;
 import domain.repository.PendingTaskRepository;
@@ -50,7 +49,6 @@ public class ProcessPendingTaskTest {
         // Simulamos datos de ordenes
         User user = User.create("test@email.com", "pass123", LocalDateTime.now());
         user.activate();
-        user.setExpiresAt(LocalDateTime.now().plusDays(1));
 
         Order order = Order.create(user, new BigDecimal("100.00"), LocalDateTime.now());
         order.setId(10L);

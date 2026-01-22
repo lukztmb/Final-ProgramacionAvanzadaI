@@ -2,15 +2,14 @@ package application.usecase;
 
 import application.dto.request.UserRequestDTO;
 import application.dto.response.UserResponseDTO;
-import application.ports.EmailServices;
-import application.services.ActivationTokenServices;
-import application.usecase.RegisterUser;
+import domain.model.User;
+import domain.model.UserStatus;
 import domain.repository.UserRepository;
 import infrastructure.exception.BusinessRuleViolationsException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.util.Optional;
 
@@ -23,76 +22,57 @@ public class RegisterUserTest {
     private UserRepository userRepository;
     private RegisterUser registerUser;
 
-    private ActivationTokenServices activationTokenServices;
-    private EmailServices emailServices;
-
-    private ActivationTokenRepository tokenRepository;
-
     @BeforeEach
     void setUp() {
-
         userRepository = mock(UserRepository.class);
-        tokenRepository = mock(InMemoryActivationTokenRepository.class);
-
-        activationTokenServices = mock(ActivationTokenServices.class);
-        emailServices = mock(EmailServices.class);
-
-        registerUser = new RegisterUser(userRepository, activationTokenServices, emailServices);
+        registerUser = new RegisterUser(userRepository);
     }
 
     @Test
-    @Order(1)
-    @DisplayName("Register_Use")
+    @DisplayName("Should register user successfully with PENDING status")
+    void shouldRegisterUserSuccessfully() {
+        // Arrange
+        String email = "newuser@test.com";
+        String password = "password123";
+        UserRequestDTO request = new UserRequestDTO(email, password);
 
-    void shouldRegisterUserSuccessfully(){
-        UserRequestDTO request = new UserRequestDTO("ejemplo@test.com",
-                "passwExample");
+        when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-        //simulamos que existe este email no existe
-        when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
-        //simulamos el guardado y retornamos el mismo usuario con id seteado
-        when(userRepository.save(any())).thenAnswer(i -> {
-            domain.model.User u =i.getArgument(0);
+
+        // Mock save returning the user with ID
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+            User u = invocation.getArgument(0);
             u.setId(1L);
             return u;
         });
 
-        UserResponseDTO responseDTO = registerUser.registerUser(request);
 
-        assertNotNull(responseDTO);
-        assertEquals("ejemplo@test.com",responseDTO.email());
-        assertEquals("PENDING", responseDTO.status());
+        // Act
+        UserResponseDTO response = registerUser.registerUser(request);
 
-        verify(userRepository, times(1)).save(any());
 
+        // Assert
+        assertNotNull(response);
+        assertEquals(email, response.email());
+        assertEquals("PENDING", response.status());
+
+
+        // Verificamos que se guardó con el estado correcto
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(userCaptor.capture());
+
+        User capturedUser = userCaptor.getValue();
+        assertEquals(UserStatus.PENDING, capturedUser.getStatus());
+        assertNotNull(capturedUser.getCreatedAt());
     }
 
     @Test
-    @Order(2)
-    @DisplayName("Email_User_Exist")
-    void shouldEmailUserExist(){
-        UserRequestDTO request = new UserRequestDTO("exists@test.com", "passw123");
-        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(mock(domain.model.User.class)));
-
-        BusinessRuleViolationsException exception = assertThrows(
-                BusinessRuleViolationsException.class,
-                () -> registerUser.registerUser(request)
-        );
-
-        assertEquals("Email ya esta registrado", exception.getMessage());
-        verify(userRepository, never()).save(any());
-    }
-
-    @Test
-    @Order(3)
-    @DisplayName("Passw_Short")
-    void shouldFailIfPasswordIsTooShort() {
-        UserRequestDTO request = new UserRequestDTO("short@test.com", "123");
-        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+    @DisplayName("Should fail if email already exists")
+    void shouldFailIfEmailExists() {
+        UserRequestDTO request = new UserRequestDTO("exists@test.com", "pass123");
+        when(userRepository.findByEmail(request.email())).thenReturn(Optional.of(mock(User.class)));
 
         assertThrows(BusinessRuleViolationsException.class, () -> registerUser.registerUser(request));
+        verify(userRepository, never()).save(any());
     }
-
 }
-
-

@@ -5,11 +5,9 @@ import application.dto.response.OrderResponseDTO;
 import application.dto.response.PendingTaskResponseDTO;
 import application.usecase.CreateOrder;
 import application.usecase.QueueExportOrdersTask;
-import domain.model.PendingTask;
-import domain.model.PendingTaskStatus;
-import domain.repository.PendingTaskRepository;
 import infrastructure.exception.ResourceNotFoundException;
 import jakarta.validation.Valid;
+import lombok.NonNull;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -18,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.nio.file.Path;
@@ -29,19 +26,16 @@ public class OrderController {
 
     private final CreateOrder createOrder;
     private final QueueExportOrdersTask queueExportOrdersTask;
-    private final PendingTaskRepository pendingTaskRepository;
 
     public OrderController(CreateOrder createOrder,
-                           QueueExportOrdersTask queueExportOrdersTask,
-                           PendingTaskRepository pendingTaskRepository) {
+                           QueueExportOrdersTask queueExportOrdersTask) {
         this.createOrder = createOrder;
         this.queueExportOrdersTask = queueExportOrdersTask;
-        this.pendingTaskRepository = pendingTaskRepository;
     }
 
 
     @PostMapping("/users/{userId}/orders")
-    public ResponseEntity<OrderResponseDTO> createOrder(
+    public ResponseEntity<@NonNull OrderResponseDTO> createOrder(
             @PathVariable Long userId,
             @Valid @RequestBody OrderRequestDTO request) {
 
@@ -57,7 +51,7 @@ public class OrderController {
     }
 
     @PostMapping("/orders/export/request")
-    public ResponseEntity<PendingTaskResponseDTO> requestExport() {
+    public ResponseEntity<@NonNull PendingTaskResponseDTO> requestExport() {
         PendingTaskResponseDTO response = queueExportOrdersTask.execute();
 
         URI location = ServletUriComponentsBuilder
@@ -70,11 +64,7 @@ public class OrderController {
     }
 
     @GetMapping("/orders/export/{taskId}")
-    public ResponseEntity<Resource> downloadExport(@PathVariable Long taskId) {
-        PendingTask task = pendingTaskRepository.findById(taskId)
-                .orElse(null);
-
-
+    public ResponseEntity<@NonNull Resource> downloadExport(@PathVariable Long taskId) {
         try {
             Path filePath = Paths.get("exports").resolve(taskId + ".csv").normalize();
             Resource resource = new UrlResource(filePath.toUri());

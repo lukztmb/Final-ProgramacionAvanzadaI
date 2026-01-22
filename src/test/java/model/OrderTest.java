@@ -25,7 +25,6 @@ public class OrderTest {
         createdAt = LocalDateTime.now();
         activeUser = User.create("test@test.com", "pass.1234", createdAt);
         inactiveUser = User.create("test2@test.com", "pass.1234", createdAt);
-        activeUser.setExpiresAt(LocalDateTime.now().plusDays(1));
         activeUser.activate();
     }
 

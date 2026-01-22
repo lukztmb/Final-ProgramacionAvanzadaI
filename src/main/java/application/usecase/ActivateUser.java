@@ -3,10 +3,11 @@ package application.usecase;
 import domain.model.User;
 import domain.model.UserStatus;
 import domain.repository.UserRepository;
-import infrastructure.exception.BusinessRuleViolationsException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 public class ActivateUser {
@@ -16,18 +17,16 @@ public class ActivateUser {
         this.userRepository = userRepository;
     }
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 60000) // Ejecutar cada minuto
     @Transactional
-    public void activate(String email) {
-        // Buscamos el usuario
-        User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new BusinessRuleViolationsException("El usuario no existe"));
+    public void execute() {
 
-        // Activamos el usuario
-        if(user.getStatus() == UserStatus.PENDING){
+        List<User> pendingUsers = userRepository.findByStatus(UserStatus.PENDING);
+
+        pendingUsers.forEach(user -> {
             user.activate();
-        }
-        //Guardamos los cambios
-        userRepository.save(user);
+            userRepository.save(user);
+            System.out.println("User activated successfully (" + user.getEmail() +")");
+        });
     }
 }

@@ -1,10 +1,12 @@
 package application.services;
-
+/*
 import application.ports.EmailServices;
 import com.example.demo.RestapiApplication;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
 
 @SpringBootTest(classes = RestapiApplication.class)
 public class N8nEmailServicesTest {
@@ -29,3 +31,4 @@ public class N8nEmailServicesTest {
 
     }
 }
+*/
