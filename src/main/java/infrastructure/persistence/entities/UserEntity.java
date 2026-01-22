@@ -29,12 +29,6 @@ public class UserEntity {
     @Column(nullable = false)
     private UserStatus status;
 
-    @Column(name = "activation_code")
-    private String activationCode;
-
-    @Column(name = "activation_expires_at")
-    private LocalDateTime activationExpiresAt;
-
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
@@ -47,4 +41,9 @@ public class UserEntity {
         orders.add(order);
         order.setUser(this);
     }
+
+    public List<OrderEntity> getOrders (){return orders;}
+    public void setOrders(List<OrderEntity> orders) {this.orders = orders;}
+
+
 }

@@ -2,14 +2,10 @@ package application.usecase;
 
 
 import application.usecase.ActivateUser;
-import domain.model.ActivationToken;
 import domain.model.User;
 import domain.model.UserStatus;
-import domain.repository.ActivationTokenRepository;
 import domain.repository.UserRepository;
 import infrastructure.exception.BusinessRuleViolationsException;
-import infrastructure.repository.InMemoryActivationTokenRepository;
-import net.bytebuddy.asm.Advice;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
