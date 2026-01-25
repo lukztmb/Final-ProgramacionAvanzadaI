@@ -23,55 +23,47 @@ public class OrderTest {
     @BeforeEach
     void setUp() {
         createdAt = LocalDateTime.now();
+        amount = new BigDecimal("15000");
+
         activeUser = User.create("test@test.com", "pass.1234", createdAt);
-        inactiveUser = User.create("test2@test.com", "pass.1234", createdAt);
-        activeUser.setExpiresAt(LocalDateTime.now().plusDays(1));
         activeUser.activate();
+
+        inactiveUser = User.create("test2@test.com", "pass.1234", createdAt);
     }
 
     @Test
     @Order(1)
     @DisplayName("Create_order_success")
-
     public void create_Order_Success() {
-
-        amount = new BigDecimal(15000);
-        domain.model.Order order = domain.model.Order.create(activeUser,
-                amount,
-                createdAt);
+        domain.model.Order order = domain.model.Order.create(activeUser, amount, createdAt);
 
         assertNotNull(order);
         assertEquals(OrderStatus.PENDING, order.getStatus());
         assertEquals(activeUser, order.getUser());
         assertEquals(amount, order.getAmount());
-
     }
 
     @Test
     @Order(2)
     @DisplayName("failure_When_User_Is_Not_Active")
-
     public void failure_When_User_Is_Not_Active() {
         BusinessRuleViolationsException exception = assertThrows(
-                BusinessRuleViolationsException.class, () ->{
+                BusinessRuleViolationsException.class, () -> {
                     domain.model.Order.create(inactiveUser, amount, createdAt);
                 });
         assertEquals("El usuario debe estar ACTIVO para crear órdenes", exception.getMessage());
-
     }
 
     @Test
     @Order(3)
     @DisplayName("failure_When_Amount_Is_Invalid")
     void failure_When_Amount_Is_Invalid() {
-        // Test con monto nulo
         BusinessRuleViolationsException exceptionNull = assertThrows(
                 BusinessRuleViolationsException.class, () -> {
                     domain.model.Order.create(activeUser, null, createdAt);
                 });
         assertEquals("El monto debe ser mayor a 0", exceptionNull.getMessage());
 
-        // Test con monto cero o negativo
         BusinessRuleViolationsException exceptionZero = assertThrows(
                 BusinessRuleViolationsException.class, () -> {
                     domain.model.Order.create(activeUser, BigDecimal.ZERO, createdAt);
@@ -104,6 +96,4 @@ public class OrderTest {
         assertEquals(OrderStatus.APPROVED, order.getStatus());
         assertNotNull(order.getUpdatedAt());
     }
-
-
 }

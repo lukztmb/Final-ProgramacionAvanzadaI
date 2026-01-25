@@ -28,7 +28,7 @@ public class PendingTaskEntity {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    private LocalDateTime proccessedAt;
+    private LocalDateTime processedAt;
 
     private String fileContentPath;
 

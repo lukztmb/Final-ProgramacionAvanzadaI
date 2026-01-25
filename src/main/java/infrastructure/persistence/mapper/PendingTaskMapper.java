@@ -1,6 +1,7 @@
 package infrastructure.persistence.mapper;
 
 import domain.model.PendingTask;
+import domain.model.PendingTaskStatus;
 import domain.model.PendingTaskType;
 import infrastructure.persistence.entities.PendingTaskEntity;
 import org.springframework.stereotype.Component;
@@ -14,19 +15,31 @@ public class PendingTaskMapper {
         if (task == null) {
             return null;
         }
-        try{
+        try {
+            Constructor<PendingTask> constructor = PendingTask.class.getDeclaredConstructor(
+                    Long.class,
+                    PendingTaskType.class,
+                    PendingTaskStatus.class,
+                    LocalDateTime.class,
+                    LocalDateTime.class,
+                    String.class
+            );
+            constructor.setAccessible(true);
 
-            PendingTask domainTask = PendingTask.create(
+            return constructor.newInstance(
+                    task.getId(),
                     task.getType(),
-                    task.getCreatedAt());
-            domainTask.setId(task.getId());
-            domainTask.setStatus(task.getStatus());
-            return domainTask;
+                    task.getStatus(),
+                    task.getCreatedAt(),
+                    task.getProcessedAt(),
+                    task.getFileContentPath()
+            );
 
         } catch (Exception e) {
-            throw new RuntimeException("Error en el maping PendingTaskMapper.toDomain", e);
+            throw new RuntimeException("Error en el mapeo PendingTaskMapper.toDomain", e);
         }
     }
+
     public PendingTaskEntity toEntity(PendingTask task) {
         if (task == null) {
             return null;
@@ -36,7 +49,8 @@ public class PendingTaskMapper {
         entity.setType(task.getType());
         entity.setStatus(task.getStatus());
         entity.setCreatedAt(task.getCreatedAt());
-        entity.setProccessedAt(task.getProcessedAt());
+        entity.setProcessedAt(task.getProcessedAt());
+        entity.setFileContentPath(task.getFileContentPath());
         return entity;
     }
 }

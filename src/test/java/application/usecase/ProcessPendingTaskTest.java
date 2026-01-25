@@ -1,6 +1,5 @@
-package application.dto.usecase;
+package application.usecase;
 
-import application.usecase.ProcessPendingTask;
 import domain.model.*;
 import domain.repository.OrderRepository;
 import domain.repository.PendingTaskRepository;
@@ -44,13 +43,12 @@ public class ProcessPendingTaskTest {
         task.setId(1L);
 
         // Simulamos que el repositorio devuelve una tarea pendiente
-        when(pendingTaskRepository.findByStatus(PendingTaskStatus.PENDING.toString()))
+        when(pendingTaskRepository.findByStatus(PendingTaskStatus.PENDING))
                 .thenReturn(List.of(task));
 
         // Simulamos datos de ordenes
         User user = User.create("test@email.com", "pass123", LocalDateTime.now());
         user.activate();
-        user.setExpiresAt(LocalDateTime.now().plusDays(1));
 
         Order order = Order.create(user, new BigDecimal("100.00"), LocalDateTime.now());
         order.setId(10L);
@@ -80,7 +78,7 @@ public class ProcessPendingTaskTest {
 
     @Test
     void shouldDoNothingWhenNoPendingTasks() {
-        when(pendingTaskRepository.findByStatus(PendingTaskStatus.PENDING.toString()))
+        when(pendingTaskRepository.findByStatus(PendingTaskStatus.PENDING))
                 .thenReturn(Collections.emptyList());
 
         processPendingTask.execute();
@@ -94,7 +92,7 @@ public class ProcessPendingTaskTest {
         PendingTask task = PendingTask.create(PendingTaskType.EXPORT_ORDERS, LocalDateTime.now());
         task.setId(2L);
 
-        when(pendingTaskRepository.findByStatus(PendingTaskStatus.PENDING.toString()))
+        when(pendingTaskRepository.findByStatus(PendingTaskStatus.PENDING))
                 .thenReturn(List.of(task));
 
         // Simulamos error en la DB de ordenes

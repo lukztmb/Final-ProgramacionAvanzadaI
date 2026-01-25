@@ -55,6 +55,6 @@ public class QueueExportOrdersTaskIntegrationTest {
         assertTrue(savedEntity.getCreatedAt().isBefore(LocalDateTime.now().plusSeconds(1)));
         assertTrue(savedEntity.getCreatedAt().isAfter(LocalDateTime.now().minusSeconds(10)));
 
-        assertNull(savedEntity.getProccessedAt(), "La fecha de procesamiento debe ser nula al inicio");
+        assertNull(savedEntity.getProcessedAt(), "La fecha de procesamiento debe ser nula al inicio");
     }
 }
