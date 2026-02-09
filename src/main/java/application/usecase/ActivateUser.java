@@ -1,48 +1,32 @@
 package application.usecase;
 
-import domain.model.ActivationToken;
 import domain.model.User;
-import domain.repository.ActivationTokenRepository;
+import domain.model.UserStatus;
 import domain.repository.UserRepository;
-import infrastructure.exception.BusinessRuleViolationsException;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 public class ActivateUser {
     private final UserRepository userRepository;
-    private final ActivationTokenRepository tokenRepository;
 
-    public ActivateUser(UserRepository userRepository, ActivationTokenRepository tokenRepository) {
+    public ActivateUser(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.tokenRepository = tokenRepository;
     }
 
+    @Scheduled(fixedRate = 60000) // Ejecutar cada minuto
     @Transactional
-    public void activate(String email, String inputCode) {
-        // Buscamos el usuario
-        User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new BusinessRuleViolationsException("El usuario no existe"));
+    public void execute() {
 
-        // Buscamos el codigo en la db en memoria
-        ActivationToken token = tokenRepository.findByEmail(email)
-                .orElseThrow(() -> new BusinessRuleViolationsException("No existe el token para el usuario"));
+        List<User> pendingUsers = userRepository.findByStatus(UserStatus.PENDING);
 
-        // Validamos el token y su expiracion
-        if (!token.isValid(inputCode)) {
-            if (token.isExpired()){
-                throw new BusinessRuleViolationsException("El codigo ya expiro");
-            }
-            throw new BusinessRuleViolationsException("Codigo de activacion invalido");
-        }
-
-        // Guardamos la fecha de vencimiento del token en el usuario
-        user.setExpiresAt(token.getExpiresAt());
-        // Activamos el usuario
-        user.activate();
-        //Guardamos los cambios
-        userRepository.save(user);
-        // limpiamos
-        tokenRepository.delete(email);
+        pendingUsers.forEach(user -> {
+            user.activate();
+            userRepository.save(user);
+            System.out.println("User activated successfully (" + user.getEmail() +")");
+        });
     }
 }

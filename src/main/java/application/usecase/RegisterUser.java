@@ -2,16 +2,13 @@ package application.usecase;
 
 import application.dto.request.UserRequestDTO;
 import application.dto.response.UserResponseDTO;
-import domain.model.ActivationToken;
 import domain.model.User;
-import domain.repository.ActivationTokenRepository;
 import domain.repository.UserRepository;
 import infrastructure.exception.BusinessRuleViolationsException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Service
 public class RegisterUser {

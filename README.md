@@ -145,4 +145,10 @@ processedAt: LocalDateTime?
 
 ---
 
+# Team Notes
+- Create a database using Docker
+```cmd
+docker run -d -p 3306:3306 --name mysql-proyecto -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=ProyectoFinalPAI -e MYSQL_USER=sinTeclados -e MYSQL_PASSWORD=sinTeclados mysql:8.0
+```
+
 # End of Document
