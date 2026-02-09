@@ -22,7 +22,6 @@ public class UserTest {
     }
 
     @Test
-    @Order(1)
     @DisplayName("successful_User_Creation")
     void successful_User_Creation() {
         User user = User.create("user1@test.com", "user1.1234", createdAt);
@@ -34,7 +33,6 @@ public class UserTest {
     }
 
     @Test
-    @Order(2)
     @DisplayName("activate_User")
     public void activate_User() {
         User user = User.create("user1@test.com", "user1.1234", createdAt);
@@ -51,7 +49,6 @@ public class UserTest {
     }
 
     @Test
-    @Order(3)
     @DisplayName("email_and_password_attribute_failure")
     public void failure_Email_And_Password() {
         // Empty email
@@ -68,7 +65,6 @@ public class UserTest {
     }
 
     @Test
-    @Order(4)
     @DisplayName("only_pending_users_are_activated")
     public void only_pending_users_are_activated() {
         User user = User.create("user1@test.com", "user1.1234", createdAt);

@@ -4,7 +4,6 @@ import application.dto.response.PendingTaskResponseDTO;
 import domain.model.PendingTask;
 import domain.model.PendingTaskType;
 import domain.repository.PendingTaskRepository;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

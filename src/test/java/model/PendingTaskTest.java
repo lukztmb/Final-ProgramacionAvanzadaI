@@ -33,7 +33,7 @@ public class PendingTaskTest {
         assertEquals(PendingTaskStatus.PENDING, task.getStatus());
         assertEquals(taskType, task.getType());
         assertNull(task.getProcessedAt());
-        assertNull(task.getFileContentPath());
+        assertEquals("", task.getFileContentPath());
     }
 
     @Test

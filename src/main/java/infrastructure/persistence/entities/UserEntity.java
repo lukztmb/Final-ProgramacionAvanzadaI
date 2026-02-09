@@ -36,14 +36,4 @@ public class UserEntity {
     private List<OrderEntity> orders = new ArrayList<OrderEntity>();
 
     public UserEntity() {}
-
-    public void addOrders(OrderEntity order){
-        orders.add(order);
-        order.setUser(this);
-    }
-
-    public List<OrderEntity> getOrders (){return orders;}
-    public void setOrders(List<OrderEntity> orders) {this.orders = orders;}
-
-
 }

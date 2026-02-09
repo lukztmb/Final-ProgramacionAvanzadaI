@@ -7,7 +7,6 @@ import infrastructure.persistence.entities.PendingTaskEntity;
 import infrastructure.persistence.mapper.PendingTaskMapper;
 import infrastructure.persistence.repository.interfaces.IPendingTaskRepository;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Repository;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;

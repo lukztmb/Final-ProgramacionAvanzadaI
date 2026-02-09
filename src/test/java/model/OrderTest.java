@@ -32,7 +32,6 @@ public class OrderTest {
     }
 
     @Test
-    @Order(1)
     @DisplayName("Create_order_success")
     public void create_Order_Success() {
         domain.model.Order order = domain.model.Order.create(activeUser, amount, createdAt);
@@ -44,7 +43,6 @@ public class OrderTest {
     }
 
     @Test
-    @Order(2)
     @DisplayName("failure_When_User_Is_Not_Active")
     public void failure_When_User_Is_Not_Active() {
         BusinessRuleViolationsException exception = assertThrows(
@@ -55,7 +53,6 @@ public class OrderTest {
     }
 
     @Test
-    @Order(3)
     @DisplayName("failure_When_Amount_Is_Invalid")
     void failure_When_Amount_Is_Invalid() {
         BusinessRuleViolationsException exceptionNull = assertThrows(
@@ -72,7 +69,6 @@ public class OrderTest {
     }
 
     @Test
-    @Order(4)
     @DisplayName("failure_When_Date_Is_Invalid")
     void failure_When_Date_Is_Invalid() {
         LocalDateTime futureDate = LocalDateTime.now().plusDays(1);
@@ -86,7 +82,6 @@ public class OrderTest {
     }
 
     @Test
-    @Order(5)
     @DisplayName("update_Order_Status")
     void update_Order_Status() {
         domain.model.Order order = domain.model.Order.create(activeUser, new BigDecimal("100.00"), createdAt);

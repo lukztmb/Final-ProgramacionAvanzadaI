@@ -22,14 +22,13 @@ public class UserMapper {
                     LocalDateTime.class
             );
             constructor.setAccessible(true);
-            User user = constructor.newInstance(
+            return constructor.newInstance(
                     entity.getId(),
                     entity.getEmail(),
                     entity.getPassword(),
                     entity.getStatus(),
                     entity.getCreatedAt()
             );
-            return user;
         }catch (Exception e){
             throw new RuntimeException("Error Reconstruyendo el User desde la Persistencia",e);
         }
