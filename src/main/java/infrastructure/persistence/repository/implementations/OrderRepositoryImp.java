@@ -18,13 +18,6 @@ public class OrderRepositoryImp implements OrderRepository {
     private final IOrderRepository jpaRepository;
     private final OrderMapper mapper;
 
-    /*
-    public OrderRepositoryImp(IOrderRepository jpaRepository, OrderMapper mapper) {
-        this.jpaRepository = jpaRepository;
-        this.mapper = mapper;
-    }
-    */
-
     @Override
     public Order save(Order order) {
         OrderEntity entity = mapper.toEntity(order);
